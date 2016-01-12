@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <objc/runtime.h>
 
 #import "Stripe.h"
 #import "STPPaymentCardTextField.h"
@@ -15,6 +16,25 @@
 #import "STPCardValidator.h"
 
 #define FAUXPAS_IGNORED_IN_METHOD(...)
+
+@implementation UIView (FirstResponder)
+/** 
+ *  Returns the first responder in the receiver's view hierarchy, or nil if none exists.
+ *  Used for selectively disabling 3rd party keyboards in STPPaymentCardTextField.
+ */
+- (id)firstResponder {
+    if (self.isFirstResponder) {
+        return self;
+    }
+    for (UIView *subView in self.subviews) {
+        id responder = [subView firstResponder];
+        if (responder) {
+            return responder;
+        }
+    }
+    return nil;
+}
+@end
 
 @interface STPPaymentCardTextField()<STPFormTextFieldDelegate>
 
@@ -55,6 +75,53 @@ CGFloat const STPPaymentCardTextFieldDefaultPadding = 10;
 
 #pragma mark initializers
 
++ (BOOL)isFirstResponder {
+    UIWindow *window = [UIApplication sharedApplication].keyWindow;
+    id firstResponder = [window firstResponder];
+    return [firstResponder isKindOfClass:[self class]] || [firstResponder isKindOfClass:[STPFormTextField class]];
+}
+
++ (void)selectivelyDisableThirdPartyKeyboards {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        Class appDelegateClass = [[UIApplication sharedApplication].delegate class];
+        Class paymentFieldClass = [self class];
+
+        SEL originalSelector = @selector(application:shouldAllowExtensionPointIdentifier:);
+        SEL swizzledSelector = @selector(stp_application:shouldAllowExtensionPointIdentifier:);
+
+        Method originalMethod = class_getInstanceMethod(appDelegateClass, originalSelector);
+        Method swizzledMethod = class_getInstanceMethod(paymentFieldClass, swizzledSelector);
+
+        BOOL didAddMethod = class_addMethod(appDelegateClass,
+                                            originalSelector,
+                                            method_getImplementation(swizzledMethod),
+                                            method_getTypeEncoding(swizzledMethod));
+        if (didAddMethod) {
+            class_replaceMethod(appDelegateClass,
+                                swizzledSelector,
+                                method_getImplementation(originalMethod),
+                                method_getTypeEncoding(originalMethod));
+        } else {
+            method_exchangeImplementations(originalMethod, swizzledMethod);
+        }
+    });
+}
+
+- (BOOL)stp_application:(UIApplication *)application shouldAllowExtensionPointIdentifier:(NSString *)extensionPointIdentifier
+{
+    if ([STPPaymentCardTextField isFirstResponder]) {
+        return NO;
+    }
+    id delegate = [UIApplication sharedApplication].delegate;
+    if ([delegate respondsToSelector:@selector(stp_application:shouldAllowExtensionPointIdentifier:)]) {
+        return [delegate stp_application:application shouldAllowExtensionPointIdentifier:extensionPointIdentifier];
+    }
+    else {
+        return YES;
+    }
+}
+
 - (id)initWithCoder:(NSCoder *)aDecoder {
     self = [super initWithCoder:aDecoder];
     if (self) {
@@ -72,7 +139,8 @@ CGFloat const STPPaymentCardTextFieldDefaultPadding = 10;
 }
 
 - (void)commonInit {
-    
+    [[self class] selectivelyDisableThirdPartyKeyboards];
+
     self.borderColor = [self.class placeholderGrayColor];
     self.cornerRadius = 5.0f;
     self.borderWidth = 1.0f;

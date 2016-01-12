@@ -19,4 +19,14 @@
     return YES;
 }
 
+/*
+- (BOOL)application:(UIApplication *)application shouldAllowExtensionPointIdentifier:(NSString *)extensionPointIdentifier
+{
+    if ([STPPaymentCardTextField isFirstResponder]) {
+        return NO;
+    }
+    return YES;
+}
+ */
+
 @end

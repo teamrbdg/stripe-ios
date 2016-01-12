@@ -128,6 +128,11 @@
 @property (nonatomic, readonly, nullable) UIImage *brandImage;
 
 /**
+ *  Returns YES if an instance of STPPaymentCardTextField is currently the first responder.
+ */
++ (BOOL)isFirstResponder;
+
+/**
  *  Causes the text field to begin editing. Presents the keyboard.
  *
  *  @return Whether or not the text field successfully began editing.

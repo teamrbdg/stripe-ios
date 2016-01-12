@@ -26,6 +26,12 @@
     [super viewDidLoad];
     self.shippingManager = [[ShippingManager alloc] init];
     self.applePayButton.enabled = [self applePayEnabled];
+
+    UITextField *textField = [[UITextField alloc] initWithFrame:CGRectMake(0, 0, 300, 50)];
+    textField.placeholder = @"Another text field";
+    textField.borderStyle = UITextBorderStyleRoundedRect;
+    textField.center = CGPointMake(CGRectGetMidX(self.view.bounds), CGRectGetMidY(self.view.bounds));
+    [self.view addSubview:textField];
 }
 
 - (void)presentError:(NSError *)error {
