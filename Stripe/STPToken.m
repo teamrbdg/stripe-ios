@@ -17,6 +17,7 @@
 @property (nonatomic, nullable) STPCard *card;
 @property (nonatomic, nullable) STPBankAccount *bankAccount;
 @property (nonatomic, nullable) NSDate *created;
+@property (nonatomic, readwrite, nonnull, copy) NSDictionary *allResponseFields;
 @end
 
 @implementation STPToken
@@ -60,6 +61,12 @@
            [self.card isEqual:object.card] && [self.tokenId isEqualToString:object.tokenId] && [self.created isEqualToDate:object.created];
 }
 
+#pragma mark STPSource
+
+- (NSString *)stripeID {
+    return self.tokenId;
+}
+
 #pragma mark STPAPIResponseDecodable
 
 + (NSArray *)requiredFields {
@@ -86,6 +93,8 @@
     if (bankAccountDictionary) {
         token.bankAccount = [STPBankAccount decodedObjectFromAPIResponse:bankAccountDictionary];
     }
+    
+    token.allResponseFields = dict;
     return token;
 }
 

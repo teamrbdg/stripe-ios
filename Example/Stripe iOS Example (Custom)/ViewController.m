@@ -47,6 +47,8 @@
 - (BOOL)applePayEnabled {
     if ([PKPaymentRequest class]) {
         PKPaymentRequest *paymentRequest = [Stripe paymentRequestWithMerchantIdentifier:AppleMerchantId];
+        paymentRequest.shippingMethods = [self.shippingManager defaultShippingMethods];
+        paymentRequest.paymentSummaryItems = [self summaryItemsForShippingMethod:paymentRequest.shippingMethods.firstObject];
         return [Stripe canSubmitPaymentRequest:paymentRequest];
     }
     return NO;
@@ -59,11 +61,11 @@
     NSString *merchantId = AppleMerchantId;
 
     PKPaymentRequest *paymentRequest = [Stripe paymentRequestWithMerchantIdentifier:merchantId];
+    [paymentRequest setRequiredShippingAddressFields:PKAddressFieldPostalAddress];
+    [paymentRequest setRequiredBillingAddressFields:PKAddressFieldPostalAddress];
+    paymentRequest.shippingMethods = [self.shippingManager defaultShippingMethods];
+    paymentRequest.paymentSummaryItems = [self summaryItemsForShippingMethod:paymentRequest.shippingMethods.firstObject];
     if ([Stripe canSubmitPaymentRequest:paymentRequest]) {
-        [paymentRequest setRequiredShippingAddressFields:PKAddressFieldPostalAddress];
-        [paymentRequest setRequiredBillingAddressFields:PKAddressFieldPostalAddress];
-        paymentRequest.shippingMethods = [self.shippingManager defaultShippingMethods];
-        paymentRequest.paymentSummaryItems = [self summaryItemsForShippingMethod:paymentRequest.shippingMethods.firstObject];
         PKPaymentAuthorizationViewController *auth = [[PKPaymentAuthorizationViewController alloc] initWithPaymentRequest:paymentRequest];
         auth.delegate = self;
         if (auth) {
@@ -171,11 +173,11 @@
     NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:config];
     
-    NSString *urlString = [BackendChargeURLString stringByAppendingPathComponent:@"charge"];
+    NSString *urlString = [BackendChargeURLString stringByAppendingPathComponent:@"charge_card"];
     NSURL *url = [NSURL URLWithString:urlString];
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url];
     request.HTTPMethod = @"POST";
-    NSString *postBody = [NSString stringWithFormat:@"stripeToken=%@&amount=%@", token.tokenId, @1000];
+    NSString *postBody = [NSString stringWithFormat:@"stripe_token=%@&amount=%@", token.tokenId, @1000];
     NSData *data = [postBody dataUsingEncoding:NSUTF8StringEncoding];
     
     NSURLSessionUploadTask *uploadTask = [session uploadTaskWithRequest:request

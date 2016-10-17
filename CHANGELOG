@@ -1,3 +1,73 @@
+== 9.0.0 2016-10-04
+* Change minimum requirements to iOS 8 and Xcode 8
+* Adds "app extension API only" support.
+* Updates Swift example app to Swift 3
+* Various fixes to ObjC example app
+
+== 8.0.7 2016-09-15
+* Add ability to set currency for managed accounts when adding card
+* Fix broken links for Privacy Policy/Terms of Service for Remember Me feature
+* Sort countries in picker alphabetically by name instead of ISO code
+* Make "County" field optional on billing address screen.
+* PKPayment-related methods are now annotated as available in iOS8+ only
+* Optimized speed of input sanitation methods (thanks @kballard!)
+
+== 8.0.6 2016-09-01
+* Improved internationalization on billing address forms
+  * Users in countries that don't use postal codes will no longer see that field.
+  * The country field is now auto filled in with the phone's region
+  * Changing the selected country will now live update other fields on the form (such as State/County or Zip/Postal Code).
+* Fixed an issue where certain Cocoapods configurations could result in Stripe resource files being used in place of other frameworks' or the app's resources.
+* Fixed an issue where when using Apple Pay, STPPaymentContext would fire two `didFinishWithStatus` messages.
+* Fixed the `deviceSupportsApplePay` method to also check for Discover cards.
+* Removed keys from Stripe.bundle's Info.plist that were causing iTunes Connect to sometimes error on app submission.
+
+== 8.0.5 2016-08-26
+* You can now optionally use an array of PKPaymentSummaryItems to set your payment amount, if you would like more control over how Apple Pay forms are rendered.
+* Updated credit card and Apple Pay icons.
+* Fixed some images not being included in the resources bundle target.
+* Non-US locales now have an alphanumeric keyboard for postal code entry.
+* Modals now use UIModalPresentationStyleFormSheet.
+* Added more accessibility labels.
+* STPPaymentCardTextField now conforms to UIKeyInput (thanks @theill).
+
+== 8.0.4 2016-08-01
+* Fixed an issue with Apple Pay payments not using the correct currency.
+* View controllers now update their status bar and scroll view indicator styles based on their theme.
+* SMS code screen now offers to paste copied codes.
+
+== 8.0.3 2016-07-25
+* Fixed an issue with some Cocoapods installations
+
+== 8.0.2 2016-07-09
+* Fixed an issue with custom theming of Stripe UI
+
+== 8.0.1 2016-07-06
+* Fixed error handling in STPAddCardViewController
+
+== 8.0.0 2016-06-30
+* Added prebuilt UI for collecting and managing card information.
+
+== 7.0.2 2016-05-24
+* Fixed an issue with validating certain Visa cards.
+
+== 7.0.1 2016-04-29
+* Added Discover support for Apple Pay
+* Add the now-required `accountHolderName` and `accountHolderType` properties to STPBankAccountParams
+* We now record performance metrics for the /v1/tokens API - to disable this behavior, call [Stripe disableAnalytics].
+* You can now demo the SDK more easily by running `pod try stripe`.
+* This release also removes the deprecated Checkout functionality from the SDK.
+
+== 6.2.0 2016-02-05
+* Added an `additionalAPIParameters` field to STPCardParams and STPBankAccountParams for sending additional values to the API - useful for beta features. Similarly, added an `allResponseFields` property to STPToken, STPCard, and STPBankAccount for accessing fields in the response that are not yet refelected in those classes' @properties.
+
+== 6.1.0 2016-01-21
+* Renamed card on STPPaymentCardTextField to cardParams.
+* You can now set an STPPaymentCardTextField's contents programmatically by setting cardParams to an STPCardParams object.
+* Added delegate methods for responding to didBeginEditing events in STPPaymentCardTextField.
+* Added a UIImage category for accessing our card icon images
+* Fixed deprecation warnings for deployment targets >= iOS 9.0
+
 == 6.0.0 2015-10-19
 * Splits logic in STPCard into 2 classes - STPCard and STPCardParams. STPCardParams is for making requests to the Stripe API, while STPCard represents the response (you'll almost certainly want just to replace any usage of STPCard in your app with STPCardParams). This also applies to STPBankAccount and the newly-created STPBankAccountParams.
 * Version 6.0.1 fixes a minor Cocoapods issue.
@@ -103,7 +173,7 @@
 
 === 1.0.2 2013-09-09
 
-* Add exceptions for null successHandler and errorHandler. 
+* Add exceptions for null successHandler and errorHandler.
 * Added the ability to POST the created token to a URL.
 * Made STPCard properties nonatomic.
 * Moved PaymentKit to be a submodule; added to Podfile as a dependency.
